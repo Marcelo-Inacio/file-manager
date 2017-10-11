@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Implementation-Title: File Manager
+Implementation-Version: 0.0.1-SNAPSHOT
+Built-By: Marcelo
+Implementation-Vendor-Id: br.gov.sp.fatec.mapskills
+Build-Jdk: 1.8.0_60
+Implementation-URL: http://projects.spring.io/spring-boot/filemanager/
+Created-By: Maven Integration for Eclipse
+Implementation-Vendor: Pivotal Software, Inc.
+
