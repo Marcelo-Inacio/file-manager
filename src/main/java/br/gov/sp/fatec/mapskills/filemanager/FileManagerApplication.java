@@ -5,7 +5,7 @@
  * Fatec-Jessen Vidal proprietary/confidential. Use is subject to license terms.
  */
 
-package br.gov.sp.fatec.mapskills.filemanager.config;
+package br.gov.sp.fatec.mapskills.filemanager;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -17,7 +17,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author Marcelo
  * @version 1.0 02/09/2017
  */
-@SpringBootApplication(scanBasePackages = { "br.gov.sp.fatec.mapskills.filemanager" })
+@SpringBootApplication
 public class FileManagerApplication {
 	
 	public static void main(final String[] args) {
