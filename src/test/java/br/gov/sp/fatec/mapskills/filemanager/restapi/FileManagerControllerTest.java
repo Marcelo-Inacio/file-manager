@@ -12,6 +12,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
@@ -35,7 +36,10 @@ import br.gov.sp.fatec.mapskills.filemanager.config.WebConfig;
 import br.gov.sp.fatec.mapskills.filemanager.util.AbstractIntegrationTest;
 
 /**
- * A classe {@link FileManagerControllerTest}
+ * A classe {@link FileManagerControllerTest} contem testes de integracao
+ * para os servicos da controller <b>FileManagerController</b>.
+ * 
+ *  @see FileManagerController
  *
  * @author Marcelo Inacio
  * @version 1.0 04/09/2017
@@ -58,22 +62,22 @@ public class FileManagerControllerTest extends AbstractIntegrationTest {
 	@Test
 	public void saveFileTest() throws Exception {
 		final String json = getFileContentAsString("save-scene-image.json");
-		final ResultActions result =mockMvc.perform(post("/file")
+		final ResultActions result = mockMvc.perform(post("/file")
 				.contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
 				.content(json)).andExpect(status().isOk());
 		
 		final String resourceLocation = result.andReturn().getResponse().getHeader("resource-location");
 
-		final File file = getFileMock("/drive/scene00.jpg");
+		final File file = getFileMock("/drive/scene-test00.jpg");
 		assertTrue(file.exists());
 		assertEquals(287005L, file.length());
-		assertTrue(resourceLocation.contains("/drive/scene00.jpg"));
-		deleteFileFromResource();
+		assertTrue(resourceLocation.contains("/drive/scene-test00.jpg"));
+		deleteFileFromResource("scene-test00.jpg");
 	}
 	
 	@Test
 	public void deleteFileTest() throws Exception {
-		createFileOnResource();
+		createFileOnResource("text-test.txt");
 		mockMvc.perform(delete("/file/text-test.txt")).andExpect(status().isOk());
 		final File file = getFileMock("/drive/text-test.txt");
 		assertFalse(file.exists());
@@ -86,16 +90,31 @@ public class FileManagerControllerTest extends AbstractIntegrationTest {
 		final String message = result.getResolvedException().getMessage();
 		assertEquals("File with name: text-test.txt not found from server", message);
 	}
+	
+	@Test
+	public void updateFileTest() throws Exception {
+		createFileOnResource("scene-20171220.jpg");
+		final String json = getFileContentAsString("update-scene-image.json");
+		final ResultActions result = mockMvc.perform(put("/file/scene-20171220.jpg")
+				.contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
+				.content(json)).andExpect(status().isOk());
 		
-	public void deleteFileFromResource() throws Exception {
-		final File file = getFileMock("/drive/scene00.jpg");
+		final String resourceLocation = result.andReturn().getResponse().getHeader("resource-location");
+		assertTrue(resourceLocation.contains("/drive/scene-updated00.jpg"));
+		final File fileDeleted = getFileMock("scene-20171220.jpg");
+		assertTrue(!fileDeleted.exists());
+		deleteFileFromResource("scene-updated00.jpg");
+	}
+		
+	public void deleteFileFromResource(final String filename) throws Exception {
+		final File file = getFileMock("/drive/" + filename);
 		if(file.exists()) {
 			file.delete();
 		}
 	}
 	
-	private void createFileOnResource() throws Exception {
-		final File file = getFileMock("/drive/text-test.txt");
+	private void createFileOnResource(final String filename) throws Exception {
+		final File file = getFileMock("/drive/" + filename);
 		file.createNewFile();
 		assertTrue(file.exists());
 	}

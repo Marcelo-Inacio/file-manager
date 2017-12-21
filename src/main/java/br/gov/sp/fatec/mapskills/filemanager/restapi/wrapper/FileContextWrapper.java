@@ -38,5 +38,4 @@ public class FileContextWrapper {
 	public byte[] getFileByteArray() {
 		return Base64.getDecoder().decode(fileBase64);
 	}
-
 }

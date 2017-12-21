@@ -30,10 +30,22 @@ import lombok.AllArgsConstructor;
 public class FileManagerApplicationServices {
 	
 	private static final Logger logger = LoggerFactory.getLogger(FileManagerApplicationServices.class);
+	
+	/** Diretorio de onde serao salvos os arquivos. */
 	private static final String RESOURCE = "/drive/";
 	
 	private final ServletContext context;
 	
+	/**
+	 * Metodo resonsavel por salvar um recurso na aplicacao.
+	 * 
+	 * @param file
+	 * 		Byte array do arquivo a ser salvo.
+	 * @param fileName
+	 * 		Nome do arquivo com extensao a ser salvo.
+	 * @return
+	 * 		O caminho em nivel de diretorio do arquivo salvo.
+	 */
 	public String save(final byte[] file, final String fileName) {
 		try {
 			final String realPath = context.getRealPath(RESOURCE);
@@ -49,6 +61,12 @@ public class FileManagerApplicationServices {
 		}
 	}
 	
+	/**
+	 * Metodo responsavel por remover recurso da aplicacao.
+	 * 
+	 * @param fileName
+	 * 		Nome arquivo com extensao.
+	 */
 	public void delete(final String fileName) {
 		final File file = new File(context.getRealPath(RESOURCE + fileName));
 		if(!file.exists()) {
@@ -57,4 +75,21 @@ public class FileManagerApplicationServices {
 		file.delete();
 	}
 
+	/**
+	 * Metodo responsavel por realizar a atualizacao de um recurso da aplicacao,
+	 * removendo o recurso antigo, e salvando o novo na aplicacao.
+	 * 
+	 * @param oldFileName
+	 * 		Nome do arquivo com extensao a ser removido.
+	 * @param fileByteArray
+	 * 		Array de bytes do arquivo a ser salvo.
+	 * @param fileName
+	 * 		Nome do arquivo com extensao a ser salvo.
+	 * @return
+	 * 		O caminho em nivel de diretorio de onde o recurso foi salvo.
+	 */
+	public String updateFile(final String oldFileName, final byte[] fileByteArray, final String fileName) {
+		delete(oldFileName);
+		return save(fileByteArray, fileName);
+	}
 }
