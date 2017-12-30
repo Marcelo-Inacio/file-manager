@@ -1,5 +1,4 @@
-FROM java:8
+FROM java:openjdk-8u91-jdk
 VOLUME /tmp
-ADD filemanager-0.0.1.jar app.jar
-RUN bash -c 'touch /app.jar'
-ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/app.jar"]
+CMD java -jar filemanager-0.0.1.jar
+ADD build/libs/filemanager-0.0.1.jar .
