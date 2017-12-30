@@ -67,6 +67,21 @@
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
 	</dependencies>
+	
+	<profiles>
+		<profile>
+			<id>azure</id>
+			<properties>
+				<file.path.template>%s/%s</file.path.template>
+			</properties>
+		</profile>
+		<profile>
+			<id>local</id>
+			<properties>
+				<file.path.template>%s\\%s</file.path.template>
+			</properties>
+		</profile>
+	</profiles>
 
 	<build>
 		<plugins>

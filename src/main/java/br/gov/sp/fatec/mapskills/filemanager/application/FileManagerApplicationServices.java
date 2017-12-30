@@ -16,8 +16,7 @@ import javax.servlet.ServletContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  * A classe {@link ApplicationServices}
@@ -26,15 +25,28 @@ import lombok.AllArgsConstructor;
  * @version 1.0 02/09/2017
  */
 @ApplicationServices
-@AllArgsConstructor
 public class FileManagerApplicationServices {
 	
 	private static final Logger logger = LoggerFactory.getLogger(FileManagerApplicationServices.class);
 	
 	/** Diretorio de onde serao salvos os arquivos. */
 	private static final String RESOURCE = "/drive/";
+
+	/**
+	 * Template para diretorio dos arquivos.
+	 * Ex.
+	 * 	windows: /drive\scene00.jpg
+	 *  linux: /drive/scene00.jpg
+	 */
+	private final String pathTemplate;
 	
 	private final ServletContext context;
+	
+	public FileManagerApplicationServices(@Value("${file.path.template}") final String pathTemplate,
+			final ServletContext context) {
+		this.pathTemplate = pathTemplate;
+		this.context = context;
+	}
 	
 	/**
 	 * Metodo resonsavel por salvar um recurso na aplicacao.
@@ -50,7 +62,7 @@ public class FileManagerApplicationServices {
 		try {
 			final String realPath = context.getRealPath(RESOURCE);
 			final String resourcePath = RESOURCE.concat(fileName);
-			final String filePath = String.format("%s\\%s", realPath, fileName);
+			final String filePath = String.format(pathTemplate, realPath, fileName);
 			final OutputStream stream = new FileOutputStream(filePath);
 		    stream.write(file);
 		    stream.close();
