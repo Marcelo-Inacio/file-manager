@@ -9,11 +9,14 @@ package br.gov.sp.fatec.mapskills.filemanager.restapi;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -89,6 +92,13 @@ public class FileManagerController {
 	@DeleteMapping("/file/{filename:.+}")
 	public void deleteFile(@PathVariable("filename") final String fileName) {
 		applicationServices.delete(fileName);
+	}
+	
+	@GetMapping("/test")
+	public Map<String, String> test() {
+		final Map<String, String> map = new HashMap<>(1);
+		map.put("CHAVES", "VALOR");
+		return map;
 	}
 	
 	/**

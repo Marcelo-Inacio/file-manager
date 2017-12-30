@@ -18,10 +18,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @version 1.0 02/09/2017
  */
 @SpringBootApplication
-public class FileManagerApplication {
-	
+public class FileManagerApplication {	
 	public static void main(final String[] args) {
 		SpringApplication.run(FileManagerApplication.class, args);
 	}
-
 }
