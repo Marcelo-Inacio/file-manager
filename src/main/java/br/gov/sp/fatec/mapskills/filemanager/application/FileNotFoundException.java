@@ -11,7 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
- * A classe {@link FileNotFoundException}
+ * A classe {@link FileNotFoundException} e lancada
+ * quando ao tentar recuperar um arquivo em disco,
+ * o mesmo nao e encontrado.
  *
  * @author Marcelo
  * @version 1.0 13/10/2017
@@ -23,5 +25,9 @@ public class FileNotFoundException extends FileManagerException {
 	
 	public FileNotFoundException(final String message) {
 		super(message, null);
+	}
+
+	public FileNotFoundException(final String message, final Exception exception) {
+		super(message, exception);
 	}
 }

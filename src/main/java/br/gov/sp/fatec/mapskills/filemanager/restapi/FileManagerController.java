@@ -9,12 +9,12 @@ package br.gov.sp.fatec.mapskills.filemanager.restapi;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.http.HttpEntity;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -90,15 +90,13 @@ public class FileManagerController {
 	 * 		Nome do arquivo com extensao a ser removido. ex.: imagem0001.png
 	 */
 	@DeleteMapping("/file/{filename:.+}")
-	public void deleteFile(@PathVariable("filename") final String fileName) {
-		applicationServices.delete(fileName);
+	public void deleteFile(@PathVariable("filename") final String filename) {
+		applicationServices.delete(filename);
 	}
 	
-	@GetMapping("/test")
-	public Map<String, String> test() {
-		final Map<String, String> map = new HashMap<>(1);
-		map.put("CHAVES", "VALOR");
-		return map;
+	@GetMapping(value = "/file/{filename:.+}", produces = {MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE})
+	public HttpEntity<byte[]> getImageWithMediaType(@PathVariable("filename") final String filename) {
+		return new HttpEntity<>(applicationServices.getFile(filename));
 	}
 	
 	/**

@@ -26,5 +26,4 @@ public class FileManagerException extends RuntimeException {
 	public FileManagerException(final String message, final Throwable throwable) {
 		super(message, throwable);
 	}
-
 }

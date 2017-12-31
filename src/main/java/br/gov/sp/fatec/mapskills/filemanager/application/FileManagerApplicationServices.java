@@ -11,6 +11,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import javax.servlet.ServletContext;
 
@@ -19,7 +21,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
 /**
- * A classe {@link ApplicationServices}
+ * A classe {@link ApplicationServices} contem os servicos
+ * para gerenciamento de arquivos manipulados pela aplicacao.
  *
  * @author Marcelo Inacio
  * @version 1.0 02/09/2017
@@ -103,5 +106,21 @@ public class FileManagerApplicationServices {
 	public String updateFile(final String oldFileName, final byte[] fileByteArray, final String fileName) {
 		delete(oldFileName);
 		return save(fileByteArray, fileName);
+	}
+
+	/**
+	 * Metodo responsavel por recuperar um arquivo salvo na aplicacao.
+	 * 
+	 * @param filename
+	 * 		Nome do arquivo a ser recuperado.
+	 * @return
+	 * 		Array de bytes do arquivo encontrado.
+	 */
+	public byte[] getFile(final String filename) {
+		try {
+			return Files.readAllBytes(Paths.get(context.getRealPath(RESOURCE + filename)));
+		} catch (final IOException exception) {
+			throw new FileNotFoundException("File with name: " + filename + " not found from server", exception);
+		}
 	}
 }
