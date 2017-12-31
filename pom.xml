@@ -72,13 +72,18 @@
 		<profile>
 			<id>azure</id>
 			<properties>
-				<file.path.template>%s/%s</file.path.template>
+				<spring.profiles.active>azure</spring.profiles.active>
+				<file.path.template>/home/filemanager/source/%s</file.path.template>
 			</properties>
 		</profile>
 		<profile>
 			<id>local</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
 			<properties>
-				<file.path.template>%s\\%s</file.path.template>
+				<spring.profiles.active>local</spring.profiles.active>
+				<file.path.template>D:/temp/filemanager/source/%s</file.path.template>
 			</properties>
 		</profile>
 	</profiles>

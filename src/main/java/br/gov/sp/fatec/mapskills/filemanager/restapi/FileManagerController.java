@@ -7,10 +7,6 @@
 
 package br.gov.sp.fatec.mapskills.filemanager.restapi;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpEntity;
@@ -24,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.gov.sp.fatec.mapskills.filemanager.application.FileManagerApplicationServices;
-import br.gov.sp.fatec.mapskills.filemanager.application.FileManagerException;
 import br.gov.sp.fatec.mapskills.filemanager.restapi.wrapper.FileContextWrapper;
 import lombok.AllArgsConstructor;
 
@@ -49,16 +44,14 @@ public class FileManagerController {
 	 * 
 	 * @param contextWrapper
 	 * 		Contexto para criacao do arquivo.
-	 * @param request
-	 * 		Requisicao para o recurso.
 	 * @param response
 	 * 		Resposta contendo a localizacao do arquivo.
 	 */
 	@PostMapping("/file")
 	public void saveFile(@RequestBody final FileContextWrapper contextWrapper,
-			final HttpServletRequest request, final HttpServletResponse response) {
+			final HttpServletResponse response) {
 		final String location = applicationServices.save(contextWrapper.getFileByteArray(), contextWrapper.getFileName());
-		response.addHeader("resource-location", getRosourceLocation(location, request));
+		response.addHeader("resource-location", getRosourceLocation(location));
 	}
 	
 	/**
@@ -69,18 +62,15 @@ public class FileManagerController {
 	 * 		Nome do arquivo com extensao a ser removido.
 	 * @param contextWrapper
 	 * 		Wrapper que encapsula o texto base64 do arquivo a ser salvo.
-	 * @param request
-	 * 		Request do servlet para que possa ser montado o caminho do recurso.
 	 * @param response
 	 * 		Response do servlet, onde sera adicionado no header atraves da chave
 	 * 		<i>resource-location</i> o caminho do recurso criado.
 	 */
 	@PutMapping("/file/{filename:.+}")
 	public void updateFile(@PathVariable("filename") final String oldFileName,
-			@RequestBody final FileContextWrapper contextWrapper,
-			final HttpServletRequest request, final HttpServletResponse response) {
+			@RequestBody final FileContextWrapper contextWrapper, final HttpServletResponse response) {
 		final String location = applicationServices.updateFile(oldFileName, contextWrapper.getFileByteArray(), contextWrapper.getFileName());
-		response.addHeader("resource-location", getRosourceLocation(location, request));
+		response.addHeader("resource-location", getRosourceLocation(location));
 	}
 	
 	/**
@@ -103,20 +93,10 @@ public class FileManagerController {
 	 * Metodo responsavel por montar o caminho de onde o recurso foi
 	 * salvo na aplicacao.
 	 * 
-	 * @param resource
-	 * 		Local no diretorio onde se encontra o recurso.
-	 * @param request
-	 * 		Requisicao para recuperar a porta do servidor.
 	 * @return
-	 * 		O caminho completo no servidor de onde se encontra o recurso.
+	 * 		O caminho para acesso do arquivo no servidor.
 	 */
-	private String getRosourceLocation(final String resource, final HttpServletRequest request) {
-		try {
-			final String serverIP = InetAddress.getLocalHost().getHostAddress();
-			final int serverPort = request.getLocalPort();
-			return String.format("%s:%s%s", serverIP, serverPort, resource);
-		} catch (final UnknownHostException exception) {
-			throw new FileManagerException("did not possible get local host", exception);
-		}
+	private String getRosourceLocation(final String resource) {
+		return String.format("/file/%s", resource);
 	}
 }

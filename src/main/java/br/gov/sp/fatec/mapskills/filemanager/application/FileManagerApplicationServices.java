@@ -8,13 +8,10 @@
 package br.gov.sp.fatec.mapskills.filemanager.application;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-
-import javax.servlet.ServletContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,24 +28,17 @@ import org.springframework.beans.factory.annotation.Value;
 public class FileManagerApplicationServices {
 	
 	private static final Logger logger = LoggerFactory.getLogger(FileManagerApplicationServices.class);
-	
-	/** Diretorio de onde serao salvos os arquivos. */
-	private static final String RESOURCE = "/drive/";
 
 	/**
 	 * Template para diretorio dos arquivos.
 	 * Ex.
-	 * 	windows: /drive\scene00.jpg
-	 *  linux: /drive/scene00.jpg
+	 * 	windows: /home/filemanager/source/scene00.jpg
+	 *  linux: D:/filemanager/source/scene00.jpg
 	 */
 	private final String pathTemplate;
 	
-	private final ServletContext context;
-	
-	public FileManagerApplicationServices(@Value("${file.path.template}") final String pathTemplate,
-			final ServletContext context) {
+	public FileManagerApplicationServices(@Value("${file.path.template}") final String pathTemplate) {
 		this.pathTemplate = pathTemplate;
-		this.context = context;
 	}
 	
 	/**
@@ -56,36 +46,31 @@ public class FileManagerApplicationServices {
 	 * 
 	 * @param file
 	 * 		Byte array do arquivo a ser salvo.
-	 * @param fileName
+	 * @param filename
 	 * 		Nome do arquivo com extensao a ser salvo.
 	 * @return
 	 * 		O caminho em nivel de diretorio do arquivo salvo.
 	 */
-	public String save(final byte[] file, final String fileName) {
+	public String save(final byte[] file, final String filename) {
 		try {
-			final String realPath = context.getRealPath(RESOURCE);
-			final String resourcePath = RESOURCE.concat(fileName);
-			final String filePath = String.format(pathTemplate, realPath, fileName);
-			final OutputStream stream = new FileOutputStream(filePath);
-		    stream.write(file);
-		    stream.close();
-		    return resourcePath;
+			Files.write(getPath(filename), file);
+			return filename;
 		} catch (final IOException exception) {
 			logger.error("Falha ao tentar gravar o arquivo no disco", exception);
-			throw new FileManagerException("Fail to write file with name: " + fileName, exception);
+			throw new FileManagerException("Fail to write file with name: " + filename, exception);
 		}
 	}
 	
 	/**
 	 * Metodo responsavel por remover recurso da aplicacao.
 	 * 
-	 * @param fileName
+	 * @param filename
 	 * 		Nome arquivo com extensao.
 	 */
-	public void delete(final String fileName) {
-		final File file = new File(context.getRealPath(RESOURCE + fileName));
+	public void delete(final String filename) {
+		final File file = getPath(filename).toFile();
 		if(!file.exists()) {
-			throw new FileNotFoundException("File with name: " + fileName + " not found from server");
+			throw new FileNotFoundException("File with name: " + filename + " not found from server");
 		}
 		file.delete();
 	}
@@ -117,13 +102,17 @@ public class FileManagerApplicationServices {
 	 * 		Array de bytes do arquivo encontrado.
 	 */
 	public byte[] getFile(final String filename) {
-		final String path = context.getRealPath(RESOURCE + filename);
 		try {
-			logger.info(path);
-			return Files.readAllBytes(Paths.get(path));
+			final Path path = getPath(filename);
+			logger.info(path.toString());
+			return Files.readAllBytes(path);
 		} catch (final IOException exception) {
-			logger.warn("File: " + path + " not found", exception);
+			logger.warn("File: " + filename + " not found", exception);
 			throw new FileNotFoundException("File with name: " + filename + " not found from server", exception);
 		}
+	}
+	
+	private Path getPath(final String filename) {
+		return Paths.get(String.format(pathTemplate, filename));
 	}
 }

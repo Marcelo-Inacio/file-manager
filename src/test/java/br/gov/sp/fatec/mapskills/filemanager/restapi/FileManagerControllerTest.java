@@ -17,11 +17,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 import java.io.File;
+import java.nio.file.Paths;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -54,6 +56,9 @@ public class FileManagerControllerTest extends AbstractIntegrationTest {
 	
 	protected MockMvc mockMvc;
 	
+	@Value("${file.path.template}")
+	private String pathTemplate;
+	
 	@Before
 	public void setup() {
 		mockMvc = webAppContextSetup(context).build();
@@ -68,10 +73,10 @@ public class FileManagerControllerTest extends AbstractIntegrationTest {
 		
 		final String resourceLocation = result.andReturn().getResponse().getHeader("resource-location");
 
-		final File file = getFileMock("/drive/scene-test00.jpg");
+		final File file = getFileMock("scene-test00.jpg");
 		assertTrue(file.exists());
 		assertEquals(287005L, file.length());
-		assertTrue(resourceLocation.contains("/drive/scene-test00.jpg"));
+		assertTrue(resourceLocation.contains("/file/scene-test00.jpg"));
 		deleteFileFromResource("scene-test00.jpg");
 	}
 	
@@ -79,7 +84,7 @@ public class FileManagerControllerTest extends AbstractIntegrationTest {
 	public void deleteFileTest() throws Exception {
 		createFileOnResource("text-test.txt");
 		mockMvc.perform(delete("/file/text-test.txt")).andExpect(status().isOk());
-		final File file = getFileMock("/drive/text-test.txt");
+		final File file = getFileMock("text-test.txt");
 		assertFalse(file.exists());
 	}
 	
@@ -100,27 +105,27 @@ public class FileManagerControllerTest extends AbstractIntegrationTest {
 				.content(json)).andExpect(status().isOk());
 		
 		final String resourceLocation = result.andReturn().getResponse().getHeader("resource-location");
-		assertTrue(resourceLocation.contains("/drive/scene-updated00.jpg"));
+		assertTrue(resourceLocation.contains("scene-updated00.jpg"));
 		final File fileDeleted = getFileMock("scene-20171220.jpg");
 		assertTrue(!fileDeleted.exists());
 		deleteFileFromResource("scene-updated00.jpg");
 	}
 		
-	public void deleteFileFromResource(final String filename) throws Exception {
-		final File file = getFileMock("/drive/" + filename);
+	private void deleteFileFromResource(final String filename) throws Exception {
+		final File file = getFileMock(filename);
 		if(file.exists()) {
 			file.delete();
 		}
+		assertFalse(file.exists());
 	}
 	
 	private void createFileOnResource(final String filename) throws Exception {
-		final File file = getFileMock("/drive/" + filename);
+		final File file = getFileMock(filename);
 		file.createNewFile();
 		assertTrue(file.exists());
 	}
 	
 	private File getFileMock(final String fileName) {
-		final String path = context.getServletContext().getRealPath(fileName);
-		return new File(path);
+		return Paths.get(String.format(pathTemplate, fileName)).toFile();
 	}
 }
