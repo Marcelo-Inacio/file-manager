@@ -10,7 +10,6 @@ package br.gov.sp.fatec.mapskills.filemanager.restapi;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpEntity;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,8 +37,8 @@ public class FileManagerController {
 	private final FileManagerApplicationServices applicationServices;
 	
 	/**
-	 * Endpoint para servico de criacao de arquivo. Para acessar o
-	 * arquivo criado, basta recuperar a localizacao indicada no
+	 * Endpoint para servico de salvar arquivo. Para acessar o
+	 * arquivo salvo, basta recuperar a localizacao indicada no
 	 * cabecalho <b>resource-location</b> encontrada no <i>response</i>.
 	 * 
 	 * @param contextWrapper
@@ -48,8 +47,7 @@ public class FileManagerController {
 	 * 		Resposta contendo a localizacao do arquivo.
 	 */
 	@PostMapping("/file")
-	public void saveFile(@RequestBody final FileContextWrapper contextWrapper,
-			final HttpServletResponse response) {
+	public void saveFile(@RequestBody final FileContextWrapper contextWrapper, final HttpServletResponse response) {
 		final String location = applicationServices.save(contextWrapper.getFileByteArray(), contextWrapper.getFileName());
 		response.addHeader("resource-location", getRosourceLocation(location));
 	}
@@ -66,7 +64,7 @@ public class FileManagerController {
 	 * 		Response do servlet, onde sera adicionado no header atraves da chave
 	 * 		<i>resource-location</i> o caminho do recurso criado.
 	 */
-	@PutMapping("/file/{filename:.+}")
+	@PutMapping("/file/{filename:.*}")
 	public void updateFile(@PathVariable("filename") final String oldFileName,
 			@RequestBody final FileContextWrapper contextWrapper, final HttpServletResponse response) {
 		final String location = applicationServices.updateFile(oldFileName, contextWrapper.getFileByteArray(), contextWrapper.getFileName());
@@ -79,13 +77,13 @@ public class FileManagerController {
 	 * @param fileName
 	 * 		Nome do arquivo com extensao a ser removido. ex.: imagem0001.png
 	 */
-	@DeleteMapping("/file/{filename:.+}")
+	@DeleteMapping("/file/{filename:.*}")
 	public void deleteFile(@PathVariable("filename") final String filename) {
 		applicationServices.delete(filename);
 	}
 	
-	@GetMapping(value = "/file/{filename:.+}", produces = {MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE})
-	public HttpEntity<byte[]> getImageWithMediaType(@PathVariable("filename") final String filename) {
+	@GetMapping(value = "/file/{filename:.*}")
+	public HttpEntity<byte[]> getFile(@PathVariable("filename") final String filename) {
 		return new HttpEntity<>(applicationServices.getFile(filename));
 	}
 	

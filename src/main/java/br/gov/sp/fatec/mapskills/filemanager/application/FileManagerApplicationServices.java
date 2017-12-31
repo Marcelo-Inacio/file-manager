@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +30,8 @@ import org.springframework.beans.factory.annotation.Value;
 public class FileManagerApplicationServices {
 	
 	private static final Logger logger = LoggerFactory.getLogger(FileManagerApplicationServices.class);
+	
+	private static final List<String> EXTENSIONS_ALLOWED = Arrays.asList(".png", ".jpg", ".pdf");
 
 	/**
 	 * Template para diretorio dos arquivos.
@@ -53,14 +57,15 @@ public class FileManagerApplicationServices {
 	 */
 	public String save(final byte[] file, final String filename) {
 		try {
+			validateFileExtension(filename);
 			Files.write(getPath(filename), file);
 			return filename;
 		} catch (final IOException exception) {
-			logger.error("Falha ao tentar gravar o arquivo no disco", exception);
-			throw new FileManagerException("Fail to write file with name: " + filename, exception);
+			logger.error("Failed to write file " + filename + " to disk", exception);
+			throw new FileManagerException("Failed to write file with name: " + filename, exception);
 		}
 	}
-	
+
 	/**
 	 * Metodo responsavel por remover recurso da aplicacao.
 	 * 
@@ -70,6 +75,7 @@ public class FileManagerApplicationServices {
 	public void delete(final String filename) {
 		final File file = getPath(filename).toFile();
 		if(!file.exists()) {
+			logger.warn("File: " + filename + " not found from server");
 			throw new FileNotFoundException("File with name: " + filename + " not found from server");
 		}
 		file.delete();
@@ -104,7 +110,6 @@ public class FileManagerApplicationServices {
 	public byte[] getFile(final String filename) {
 		try {
 			final Path path = getPath(filename);
-			logger.info(path.toString());
 			return Files.readAllBytes(path);
 		} catch (final IOException exception) {
 			logger.warn("File: " + filename + " not found", exception);
@@ -112,7 +117,29 @@ public class FileManagerApplicationServices {
 		}
 	}
 	
+	/**
+	 * Metodo para recuperar <i>Path</i> do arquivo.
+	 * 
+	 * @param filename
+	 * 		Nome do arquivo.
+	 * @return
+	 */
 	private Path getPath(final String filename) {
 		return Paths.get(String.format(pathTemplate, filename));
+	}
+	
+	
+	/**
+	 * Metodo responsavel por validar a extensão do arquivo.
+	 * 
+	 * @param filename
+	 * 		Nome do arquivo.
+	 */
+	private void validateFileExtension(final String filename) {		
+		if (EXTENSIONS_ALLOWED.stream().noneMatch(extension -> filename.endsWith(extension))) {
+			logger.warn("File: " + filename + " not allowed");
+			throw new FileManagerException("File: " + filename + "not allowed, "
+					+ "only file with .png, .jpg or .pdf extensions");			
+		};
 	}
 }

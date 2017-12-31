@@ -23,6 +23,10 @@ public class FileManagerException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 	
+	public FileManagerException(final String message) {
+		super(message);
+	}
+	
 	public FileManagerException(final String message, final Throwable throwable) {
 		super(message, throwable);
 	}
