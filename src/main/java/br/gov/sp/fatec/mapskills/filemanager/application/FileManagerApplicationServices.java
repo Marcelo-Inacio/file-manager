@@ -117,9 +117,12 @@ public class FileManagerApplicationServices {
 	 * 		Array de bytes do arquivo encontrado.
 	 */
 	public byte[] getFile(final String filename) {
+		final String path = context.getRealPath(RESOURCE + filename);
 		try {
-			return Files.readAllBytes(Paths.get(context.getRealPath(RESOURCE + filename)));
+			logger.info(path);
+			return Files.readAllBytes(Paths.get(path));
 		} catch (final IOException exception) {
+			logger.warn("File: " + path + " not found", exception);
 			throw new FileNotFoundException("File with name: " + filename + " not found from server", exception);
 		}
 	}
