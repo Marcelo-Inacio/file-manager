@@ -33,7 +33,7 @@ public class FileContextDeserializer extends JsonDeserializer<FileContextWrapper
         final JsonNode node = oc.readTree(arg0);
 		
 		return new FileContextWrapper(node.get("base64").textValue(),
-				node.get("fileName").textValue());
+				node.get("filename").textValue());
 	}
 
 }

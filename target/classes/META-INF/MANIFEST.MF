@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Implementation-Title: File Manager
-Implementation-Version: 0.0.1-SNAPSHOT
+Implementation-Version: 0.0.1
 Built-By: Marcelo
 Implementation-Vendor-Id: br.gov.sp.fatec.mapskills
 Build-Jdk: 1.8.0_51

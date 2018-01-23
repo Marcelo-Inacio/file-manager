@@ -29,7 +29,7 @@ import org.springframework.beans.factory.annotation.Value;
 @ApplicationServices
 public class FileManagerApplicationServices {
 	
-	private static final Logger logger = LoggerFactory.getLogger(FileManagerApplicationServices.class);
+	private final Logger logger = LoggerFactory.getLogger(FileManagerApplicationServices.class);
 	
 	private static final List<String> EXTENSIONS_ALLOWED = Arrays.asList(".png", ".jpg", ".pdf");
 
@@ -95,7 +95,11 @@ public class FileManagerApplicationServices {
 	 * 		O caminho em nivel de diretorio de onde o recurso foi salvo.
 	 */
 	public String updateFile(final String oldFileName, final byte[] fileByteArray, final String fileName) {
-		delete(oldFileName);
+		try {
+			delete(oldFileName);			
+		} catch(final FileNotFoundException exception) {
+			logger.info("Arquivo " + fileName + " nao encontrado", exception);
+		}
 		return save(fileByteArray, fileName);
 	}
 
@@ -126,8 +130,7 @@ public class FileManagerApplicationServices {
 	 */
 	private Path getPath(final String filename) {
 		return Paths.get(String.format(pathTemplate, filename));
-	}
-	
+	}	
 	
 	/**
 	 * Metodo responsavel por validar a extensão do arquivo.
