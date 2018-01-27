@@ -1,18 +1,25 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+	
+	<modelVersion>4.0.0</modelVersion>	
+	<name>Mapskills - File Manager</name>
 	<groupId>br.gov.sp.fatec.mapskills</groupId>
 	<artifactId>filemanager</artifactId>
 	<version>1.0.0</version>
 	<packaging>jar</packaging>
-	<name>File Manager</name>
 	<description>Se trata de uma aplicação que irá fazer o gerenciamento dos arquivos da aplicação map-skills.</description>
+
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>1.5.8.RELEASE</version>
+	</parent>
 
 	<developers>
 		<developer>
 			<name>Marcelo Inácio</name>
 			<organization>Faculdade de Tecnologia - FATEC - Jessen Vidal</organization>
-			<organizationUrl>http://http://fatecsjc.azurewebsites.net</organizationUrl>
+			<organizationUrl>http://fatecsjc.azurewebsites.net</organizationUrl>
 			<email>marcelo.silva135@fatec.sp.gov.br</email>
 			<roles>
 				<role>Java Developer</role>
@@ -29,12 +36,6 @@
 		<build.final.name>mapskills-file-manager</build.final.name>
 		<docker.image.prefix>mapskills</docker.image.prefix>
 	</properties>
-
-	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>1.5.8.RELEASE</version>
-	</parent>
 
 	<dependencies>
 
