@@ -1,0 +1,5 @@
+{
+  "message": "File: text-test.txt not found from server",
+  "statusCode": 404,
+  "statusError": "NOT_FOUND"
+}

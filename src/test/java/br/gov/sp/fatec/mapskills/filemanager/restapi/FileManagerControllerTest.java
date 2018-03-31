@@ -9,8 +9,10 @@ package br.gov.sp.fatec.mapskills.filemanager.restapi;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -22,6 +24,7 @@ import java.nio.file.Paths;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -66,7 +69,7 @@ public class FileManagerControllerTest extends AbstractIntegrationTest {
 	
 	@Test
 	public void saveFileTest() throws Exception {
-		final String json = getFileContentAsString("save-scene-image.json");
+		final String json = getFileContentAsString("request/save-scene-image.json");
 		final ResultActions result = mockMvc.perform(post("/file")
 				.contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
 				.content(json)).andExpect(status().isOk());
@@ -81,6 +84,19 @@ public class FileManagerControllerTest extends AbstractIntegrationTest {
 	}
 	
 	@Test
+	public void saveFileNotAllowedExceptionTest() throws Exception {
+		final String json = getFileContentAsString("request/save-invalid-file.json");
+		final String jsonExpected = getFileContentAsString("expectations/file-precondition-failed.json");
+		
+		final MvcResult result = mockMvc.perform(post("/file")
+				.contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
+				.content(json)).andExpect(status().isPreconditionFailed()).andReturn();
+		
+		final String jsonResult = result.getResponse().getContentAsString();
+		JSONAssert.assertEquals(jsonExpected, jsonResult, false);
+	}
+	
+	@Test
 	public void deleteFileTest() throws Exception {
 		createFileOnResource("text-test.txt");
 		mockMvc.perform(delete("/file/text-test.txt")).andExpect(status().isOk());
@@ -90,16 +106,18 @@ public class FileManagerControllerTest extends AbstractIntegrationTest {
 	
 	@Test
 	public void deleteFileExceptionTest() throws Exception {
+		final String jsonExpected = getFileContentAsString("expectations/file-delete-not-found.json");
 		final MvcResult result = mockMvc.perform(delete("/file/text-test.txt"))
 				.andExpect(status().isNotFound()).andReturn();
-		final String message = result.getResolvedException().getMessage();
-		assertEquals("File with name: text-test.txt not found from server", message);
+		final String jsonResult = result.getResponse().getContentAsString();
+		assertEquals("File: text-test.txt not found from server", result.getResolvedException().getMessage());
+		JSONAssert.assertEquals(jsonExpected, jsonResult, false);
 	}
 	
 	@Test
 	public void updateFileTest() throws Exception {
 		createFileOnResource("scene-20171220.jpg");
-		final String json = getFileContentAsString("update-scene-image.json");
+		final String json = getFileContentAsString("request/update-scene-image.json");
 		final ResultActions result = mockMvc.perform(put("/file/scene-20171220.jpg")
 				.contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
 				.content(json)).andExpect(status().isOk());
@@ -109,6 +127,51 @@ public class FileManagerControllerTest extends AbstractIntegrationTest {
 		final File fileDeleted = getFileMock("scene-20171220.jpg");
 		assertTrue(!fileDeleted.exists());
 		deleteFileFromResource("scene-updated00.jpg");
+	}
+	
+	@Test
+	public void updateFileThatNotExistsTest() throws Exception {
+		final String json = getFileContentAsString("request/update-scene-image.json");
+		final ResultActions result = mockMvc.perform(put("/file/scene-20171220.jpg")
+				.contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
+				.content(json)).andExpect(status().isOk());
+		
+		final String resourceLocation = result.andReturn().getResponse().getHeader("resource-location");
+		assertTrue(resourceLocation.contains("scene-updated00.jpg"));
+		deleteFileFromResource("scene-updated00.jpg");
+	}
+	
+	@Test
+	public void getFileTest() throws Exception {
+		createFileOnResource("scene-20171220.jpg");
+		final MvcResult result = mockMvc.perform(get("/file/scene-20171220.jpg"))
+				.andExpect(status().isOk()).andReturn();
+		
+		assertNotNull(result.getResponse().getContentAsByteArray());
+		assertEquals("image/jpeg", result.getResponse().getContentType());
+		deleteFileFromResource("scene-20171220.jpg");
+	}
+	
+	@Test
+	public void getFileOctetStreamTest() throws Exception {
+		createFileOnResource("csv-file.csv");
+		final MvcResult result = mockMvc.perform(get("/file/csv-file.csv"))
+				.andExpect(status().isOk()).andReturn();
+		
+		assertNotNull(result.getResponse().getContentAsByteArray());
+		assertEquals("application/octet-stream", result.getResponse().getContentType());
+		deleteFileFromResource("csv-file.csv");
+	}
+	
+	@Test
+	public void getFileNotFoundExceptionTest() throws Exception {
+		final String jsonExpected = getFileContentAsString("expectations/file-not-found.json");
+		final MvcResult result = mockMvc.perform(get("/file/scene-20171220.jpg")
+				.contentType(MediaType.APPLICATION_JSON_UTF8))
+				.andExpect(status().isNotFound()).andReturn();
+		
+		final String jsonResult = result.getResponse().getContentAsString();
+		JSONAssert.assertEquals(jsonExpected, jsonResult, false);
 	}
 		
 	private void deleteFileFromResource(final String filename) throws Exception {

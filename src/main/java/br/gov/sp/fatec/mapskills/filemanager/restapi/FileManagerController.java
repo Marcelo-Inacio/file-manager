@@ -7,9 +7,14 @@
 
 package br.gov.sp.fatec.mapskills.filemanager.restapi;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpEntity;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -84,7 +89,8 @@ public class FileManagerController {
 	
 	@GetMapping(value = "/file/{filename:.*}")
 	public HttpEntity<byte[]> getFile(@PathVariable("filename") final String filename) {
-		return new HttpEntity<>(applicationServices.getFile(filename));
+		final byte[] file = applicationServices.getFile(filename);
+		return ResponseEntity.ok().contentType(getMediaType(filename)).body(file);
 	}
 	
 	/**
@@ -96,5 +102,22 @@ public class FileManagerController {
 	 */
 	private String getRosourceLocation(final String resource) {
 		return String.format("/file/%s", resource);
+	}
+	
+	private MediaType getMediaType(final String filename) {
+		final Map<String, MediaType> mediaTypes = new HashMap<>(3);
+		mediaTypes.put("png", MediaType.IMAGE_PNG);
+		mediaTypes.put("jpg", MediaType.IMAGE_JPEG);
+		mediaTypes.put("pdf", MediaType.APPLICATION_PDF);
+		
+		if (mediaTypes.containsKey(getExtension(filename))) {
+			return mediaTypes.get(getExtension(filename));
+		}
+		return MediaType.APPLICATION_OCTET_STREAM;
+	}
+	
+	private String getExtension(final String filename) {
+		final int index = filename.lastIndexOf('.');
+		return filename.substring(index + 1);
 	}
 }

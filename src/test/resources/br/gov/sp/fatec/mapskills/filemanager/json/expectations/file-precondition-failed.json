@@ -1,0 +1,5 @@
+{
+  "message": "File: text-file.txt not allowed. Only file with .png, .jpg or .pdf extensions",
+  "statusCode": 412,
+  "statusError": "PRECONDITION_FAILED"
+}

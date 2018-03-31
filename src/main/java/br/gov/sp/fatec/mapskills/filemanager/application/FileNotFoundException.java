@@ -22,10 +22,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class FileNotFoundException extends FileManagerException {
 
 	private static final long serialVersionUID = 1L;
-	
-	public FileNotFoundException(final String message) {
-		super(message, null);
-	}
 
 	public FileNotFoundException(final String message, final Exception exception) {
 		super(message, exception);

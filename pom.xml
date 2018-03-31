@@ -30,11 +30,39 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
+		
 		<java.version>1.8</java.version>
 		<build.final.name>mapskills-filemanager</build.final.name>
 		<docker.image.prefix>mapskills</docker.image.prefix>
+		
+		<!-- SONAR -->
+		<!-- COMANDOS PARA RODAR SONAR -->
+		<!-- mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install -Dmaven.test.failure.ignore=true -->
+		<!-- mvn cobertura:cobertura -->
+		<!-- mvn sonar:sonar -->
+		<sonar.language>java</sonar.language>
+		<sonar.projectName>Map Skills - Filemanager</sonar.projectName>
+		<sonar.junit.reportsPath>/target/surefire-reports</sonar.junit.reportsPath>
+		<sonar.language>java</sonar.language>
+		<!-- Optional URL to server. Default value is http://localhost:9000 -->
+		<sonar.host.url>http://104.41.26.21:9000</sonar.host.url>
+		<sonar.jacoco.reportPath>${project.build.directory}/jacoco.exec</sonar.jacoco.reportPath>
+		<sonar.surefire.reportsPath>${project.build.directory}/surefire-reports</sonar.surefire.reportsPath>
+		<sonar.exclusions>
+			src/main/java/br/gov/sp/fatec/mapskills/filemanager/FileManagerApplication.java,
+			src/main/java/br/gov/sp/fatec/mapskills/filemanager/config/**/*,
+			src/test/*
+		</sonar.exclusions>
+		<sonar.coverage.exclusions>
+			src/main/java/br/gov/sp/fatec/mapskills/filemanager/FileManagerApplication.java,
+			src/main/java/br/gov/sp/fatec/mapskills/filemanager/config/**/*
+		</sonar.coverage.exclusions>
+
+		<maven-project-info-reports-plugin.version>2.9</maven-project-info-reports-plugin.version>
+		<cobertura.version>2.1.1</cobertura.version>
 	</properties>
 
 	<dependencies>
@@ -66,6 +94,10 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-jsr310</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
 		</dependency>
 	</dependencies>
 
@@ -109,6 +141,54 @@
 				</configuration>
 			</plugin>
 		</plugins>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.sonarsource.scanner.maven</groupId>
+					<artifactId>sonar-maven-plugin</artifactId>
+					<version>3.2</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
+	<reporting>
+		<excludeDefaults>true</excludeDefaults>
+		<outputDirectory>${project.build.directory}/site</outputDirectory>
+		<plugins>
+			<!-- Configures the projects-info-reports plugin. Why: Reduce the time 
+				consumed considerably by removing the need to acquire dependency details 
+				and locations. Used: Site lifecycle, mvn site. -->
+			<!-- Executar o plugin com mvn cobertura:cobertura -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>${maven-project-info-reports-plugin.version}</version>
+				<configuration>
+					<dependencyDetailsEnabled>false</dependencyDetailsEnabled>
+					<dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+				</configuration>
+			</plugin>
+			<!-- integrate maven-cobertura-plugin to project site -->
+			<plugin>
+				<groupId>net.sourceforge.cobertura</groupId>
+				<artifactId>cobertura</artifactId>
+				<version>${cobertura.version}</version>
+				<configuration>
+					<formats>
+						<format>html</format>
+					</formats>
+					<instrumentation>
+						<ignores>
+							<ignore>br.gov.sp.fatec.mapskills.filemanager.config.*</ignore>
+						</ignores>
+						<excludes>
+							<exclude>**/config/*.class</exclude>
+							<exclude>**/test/*.class</exclude>
+						</excludes>
+					</instrumentation>
+				</configuration>
+			</plugin>
+		</plugins>
+	</reporting>
 
 </project>

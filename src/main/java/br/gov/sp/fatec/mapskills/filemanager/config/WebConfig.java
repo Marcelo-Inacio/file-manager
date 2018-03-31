@@ -8,6 +8,8 @@
 package br.gov.sp.fatec.mapskills.filemanager.config;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
+import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
@@ -28,4 +30,15 @@ public class WebConfig extends WebMvcConfigurerAdapter {
 	public void addResourceHandlers(final ResourceHandlerRegistry registry) {
 		registry.addResourceHandler("/drive/**").addResourceLocations("/drive/");
 	}
+	
+	@Override
+    public void configureContentNegotiation(final ContentNegotiationConfigurer configurer) {
+      configurer.favorPathExtension(false)
+              .favorParameter(true)
+              .useJaf(true)
+              .mediaType("image/jpeg", MediaType.IMAGE_JPEG)
+              .mediaType("image/png", MediaType.IMAGE_PNG)
+              .mediaType("application/pdf", MediaType.APPLICATION_PDF)
+              .mediaType("json", MediaType.APPLICATION_JSON);
+   }
 }

@@ -7,7 +7,6 @@
 
 package br.gov.sp.fatec.mapskills.filemanager.application;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,15 +28,18 @@ import org.springframework.beans.factory.annotation.Value;
 @ApplicationServices
 public class FileManagerApplicationServices {
 	
-	private final Logger logger = LoggerFactory.getLogger(FileManagerApplicationServices.class);
+	private final Logger logger = LoggerFactory.getLogger(getClass());
 	
 	private static final List<String> EXTENSIONS_ALLOWED = Arrays.asList(".png", ".jpg", ".pdf");
+	
+	private static final String FILE_NOT_FOUND = "File: %s not found from server";
 
 	/**
 	 * Template para diretorio dos arquivos.
+	 * 
 	 * Ex.
-	 * 	windows: /home/filemanager/source/scene00.jpg
-	 *  linux: D:/filemanager/source/scene00.jpg
+	 * 	linux: /home/filemanager/source/scene00.jpg
+	 *  windows: D:/filemanager/source/scene00.jpg
 	 */
 	private final String pathTemplate;
 	
@@ -46,7 +48,7 @@ public class FileManagerApplicationServices {
 	}
 	
 	/**
-	 * Metodo resonsavel por salvar um recurso na aplicacao.
+	 * Resonsavel por salvar um recurso na aplicacao.
 	 * 
 	 * @param file
 	 * 		Byte array do arquivo a ser salvo.
@@ -67,22 +69,22 @@ public class FileManagerApplicationServices {
 	}
 
 	/**
-	 * Metodo responsavel por remover recurso da aplicacao.
+	 * Responsavel por remover recurso da aplicacao.
 	 * 
 	 * @param filename
 	 * 		Nome arquivo com extensao.
 	 */
 	public void delete(final String filename) {
-		final File file = getPath(filename).toFile();
-		if(!file.exists()) {
-			logger.warn("File: " + filename + " not found from server");
-			throw new FileNotFoundException("File with name: " + filename + " not found from server");
+		try {
+			Files.delete(getPath(filename));
+		} catch (final IOException exception) {
+			logger.info(String.format(FILE_NOT_FOUND, filename));
+			throw new FileNotFoundException(String.format(FILE_NOT_FOUND, filename), exception);
 		}
-		file.delete();
 	}
 
 	/**
-	 * Metodo responsavel por realizar a atualizacao de um recurso da aplicacao,
+	 * Responsavel por realizar a atualizacao de um recurso da aplicacao,
 	 * removendo o recurso antigo, e salvando o novo na aplicacao.
 	 * 
 	 * @param oldFileName
@@ -94,17 +96,17 @@ public class FileManagerApplicationServices {
 	 * @return
 	 * 		O caminho em nivel de diretorio de onde o recurso foi salvo.
 	 */
-	public String updateFile(final String oldFileName, final byte[] fileByteArray, final String fileName) {
+	public String updateFile(final String oldFileName, final byte[] fileByteArray, final String filename) {
 		try {
-			delete(oldFileName);			
+			delete(oldFileName);
 		} catch(final FileNotFoundException exception) {
-			logger.info("Arquivo " + fileName + " nao encontrado", exception);
+			logger.info(String.format(FILE_NOT_FOUND, filename), exception);
 		}
-		return save(fileByteArray, fileName);
+		return save(fileByteArray, filename);
 	}
 
 	/**
-	 * Metodo responsavel por recuperar um arquivo salvo na aplicacao.
+	 * Responsavel por recuperar um arquivo salvo na aplicacao.
 	 * 
 	 * @param filename
 	 * 		Nome do arquivo a ser recuperado.
@@ -116,13 +118,13 @@ public class FileManagerApplicationServices {
 			final Path path = getPath(filename);
 			return Files.readAllBytes(path);
 		} catch (final IOException exception) {
-			logger.warn("File: " + filename + " not found", exception);
-			throw new FileNotFoundException("File with name: " + filename + " not found from server", exception);
+			logger.info(String.format(FILE_NOT_FOUND, filename), exception);
+			throw new FileNotFoundException(String.format(FILE_NOT_FOUND, filename), exception);
 		}
 	}
 	
 	/**
-	 * Metodo para recuperar <i>Path</i> do arquivo.
+	 * Recuperar <i>Path</i> do arquivo.
 	 * 
 	 * @param filename
 	 * 		Nome do arquivo.
@@ -133,16 +135,15 @@ public class FileManagerApplicationServices {
 	}	
 	
 	/**
-	 * Metodo responsavel por validar a extensão do arquivo.
+	 * Responsavel por validar a extensão do arquivo.
 	 * 
 	 * @param filename
 	 * 		Nome do arquivo.
 	 */
 	private void validateFileExtension(final String filename) {		
 		if (EXTENSIONS_ALLOWED.stream().noneMatch(extension -> filename.endsWith(extension))) {
-			logger.warn("File: " + filename + " not allowed");
-			throw new FileManagerException("File: " + filename + "not allowed, "
-					+ "only file with .png, .jpg or .pdf extensions");			
-		};
+			throw new FileNotAllowedException(String.format("File: %s not allowed.", filename)
+					.concat(" Only file with .png, .jpg or .pdf extensions"));
+		}
 	}
 }
